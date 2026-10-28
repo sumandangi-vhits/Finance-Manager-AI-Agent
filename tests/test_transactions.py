@@ -122,12 +122,19 @@ def test_invalid_data_rejected(conn, two_users):
 
 def test_confirm_transaction(conn, two_users):
     a, _ = two_users
-    tid = tx.create_transaction(conn, a, SAMPLE)
+    data = {**SAMPLE, "uncertain_fields": []}
+    tid = tx.create_transaction(conn, a, data)
+
     assert tx.confirm_transaction(conn, a, tid) is True
     txn = tx.get_transaction(conn, a, tid)
+
     assert txn["status"] == "confirmed"
     assert txn["uncertain_fields"] == []
-    assert any(c["field_name"] == "status" for c in tx.get_corrections(conn, a, tid))
+    assert any(
+        c["field_name"] == "status"
+        for c in tx.get_corrections(conn, a, tid)
+    )
+
 
 
 def test_delete_cascades(conn, two_users):
