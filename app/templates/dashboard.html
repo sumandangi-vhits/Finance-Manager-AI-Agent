@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard | Finance Manager AI</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #182230;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 5%;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        header h2 { margin: 0; }
+        main { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+        .muted { color: #667085; }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin: 24px 0;
+        }
+        .card, .panel {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+        }
+        .card p { margin-bottom: 8px; color: #667085; }
+        .value { font-size: 28px; font-weight: bold; }
+        .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        a.button, button {
+            display: inline-block;
+            padding: 11px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: #2357e7;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .secondary { background: #eef2ff !important; color: #2345a5 !important; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { text-align: left; padding: 14px 8px; border-bottom: 1px solid #eee; }
+        th { color: #667085; font-size: 13px; }
+        .status { color: #9a6700; background: #fff4ce; padding: 5px 8px; border-radius: 20px; }
+        .warning { margin-top: 18px; padding: 14px; background: #fff8e6; border-radius: 10px; }
+        @media (max-width: 600px) {
+            header { align-items: flex-start; }
+            table { font-size: 13px; }
+            th, td { padding: 10px 4px; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h2>Finance Manager AI</h2>
+    <form method="POST" action="{{ url_for('auth.logout') }}">
+        <button type="submit" class="secondary">Log out</button>
+    </form>
+</header>
+
+<main>
+    <h1>Your finances at a glance</h1>
+    <p class="muted">Welcome, {{ email }}. Review your spending and manage your receipts.</p>
+
+    
+    <div class="actions">
+        <a class="button" href="{{ url_for('upload_receipt') }}">+ Upload receipt</a>
+        <a class="button secondary" href="{{ url_for('transactions_page') }}">View all transactions</a>
+        <a class="button" href="{{ url_for('ask_finance') }}">Finance AI Assistant</a>
+    </div>
+
+
+    <section class="cards">
+        <div class="card">
+            <p>Total recorded spending</p>
+            <div class="value">{{ total_spending }}</div>
+        </div>
+        <div class="card">
+            <p>Transactions</p>
+            <div class="value">{{ transaction_count }}</div>
+        </div>
+        <div class="card">
+            <p>Pending reviews</p>
+            <div class="value">{{ pending_count }}</div>
+        </div>
+    </section>
+
+    {% if pending_count %}
+    <div class="warning">
+        <strong>Action needed:</strong> You have {{ pending_count }} transaction(s) awaiting review.
+        AI-extracted details should be checked before confirmation.
+    </div>
+    {% endif %}
+
+    <section class="panel" style="margin-top: 24px;">
+        <h2>Recent transactions</h2>
+        {% if transactions %}
+        <table>
+            <thead>
+                <tr><th>Merchant</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn.merchant or "Unknown merchant" }}</td>
+                    <td>{{ txn.txn_date or "Unknown date" }}</td>
+                    <td>{{ txn.currency }} {{ "%.2f"|format((txn.total_minor or 0) / 100) }}</td>
+                    <td><span class="status">{{ txn.status }}</span></td>
+                    <td><a href="{{ url_for('review_transaction', txn_id=txn.id) }}">Review</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="muted">No transactions yet. Upload a receipt to get started.</p>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

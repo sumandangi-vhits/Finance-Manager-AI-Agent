@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Transaction - Finance Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 35px auto;
+            padding: 20px;
+            background: #f5f7fb;
+            color: #222;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px #0000000d;
+        }
+        label {
+            display: block;
+            margin: 15px 0 6px;
+            font-weight: bold;
+        }
+        input, select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccd2dc;
+            border-radius: 6px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+        }
+        .confirm { background: #15803d; }
+        
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        .message.success {
+            background: #e8f5e9;
+            color: #166534;
+        }
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .item { border-bottom: 1px solid #eee; padding: 12px 0; }
+        a { color: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>Review Transaction</h1>
+    <p><a href="{{ url_for('transactions_page') }}">← Back to transactions</a></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+    
+    {% if issues %}
+        <div class="card">
+            <h2>Information to Review</h2>
+            <p>Please review these questions before confirming your transaction.</p>
+
+            {% for issue in issues %}
+                <div class="message error">
+                    <strong>{{ issue.field }}</strong>
+                    <p>{{ issue.message }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    
+    {% if clarifications %}
+        <div class="card">
+            <h2>Clarification History</h2>
+            <p>Review the status of questions about this receipt.</p>
+
+            {% for clarification in clarifications %}
+                <div class="item">
+                    <strong>{{ clarification["field_name"] }}</strong>
+                    <p>{{ clarification["question"] }}</p>
+                    <p>
+                        Status:
+                        <strong>{{ clarification["status"]|title }}</strong>
+                    </p>
+
+                    {% if clarification["status"] == "answered" %}
+                        <p>
+                            Answer:
+                            {{ clarification["answer"] or "No answer recorded" }}
+                        </p>
+                    {% elif clarification["status"] == "unknown" %}
+                        <p>The user could not provide this information.</p>
+                    
+                    {% else %}
+                        <p>Waiting for clarification.</p>
+
+                        {% if clarification["field_name"] == "items" %}
+                            <form method="POST"
+                                action="{{ url_for('answer_clarification_route',
+                                                    clarification_id=clarification['id']) }}">
+                                <input type="hidden" name="txn_id" value="{{ txn['id'] }}">
+                                <input type="hidden" name="answer" value="Confirmed after review">
+
+                                <button type="submit" name="status" value="answered">
+                                    Confirm Item List
+                                </button>
+
+                                <button type="submit" name="status" value="unknown">
+                                    I Don't Know
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="POST"
+                                action="{{ url_for('answer_clarification_route',
+                                                    clarification_id=clarification['id']) }}">
+                                <input type="hidden" name="txn_id" value="{{ txn['id'] }}">
+
+                                <label for="answer-{{ clarification['id'] }}">
+                                    Your answer
+                                </label>
+                                <input
+                                    id="answer-{{ clarification['id'] }}"
+                                    name="answer"
+                                    placeholder="Enter the correct information"
+                                    required
+                                >
+
+                                <button type="submit" name="status" value="answered">
+                                    Submit Answer
+                                </button>
+
+                                <button type="submit" name="status" value="unknown">
+                                    I Don't Know
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}        
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Edit transaction details</h2>
+
+        <form method="POST"
+              action="{{ url_for('edit_transaction', txn_id=txn['id']) }}">
+            <label for="merchant">Merchant</label>
+            <input id="merchant" name="merchant"
+                   value="{{ txn['merchant'] or '' }}" required>
+
+            <label for="txn_date">Transaction date</label>
+            <input id="txn_date" type="date" name="txn_date"
+                   value="{{ txn['txn_date'] or '' }}" required>
+
+            <label for="total">Total amount (₹)</label>
+            <input id="total" type="number" name="total"
+                   min="0" step="0.01"
+                   value="{{ '%.2f'|format(txn['total_minor'] / 100) }}"
+                   required>
+
+            <label for="currency">Currency</label>
+            <input id="currency" name="currency"
+                   value="{{ txn['currency'] or 'INR' }}" required>
+
+            <label for="payment_method">Payment method</label>
+            <input id="payment_method" name="payment_method"
+                   value="{{ txn['payment_method'] or '' }}">
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    
+    <div class="card">
+        <h2>Line Items</h2>
+
+        {% for item in txn["items"] %}
+            <div class="item">
+                <form method="POST"
+                      action="{{ url_for('edit_line_item_route',
+                                         txn_id=txn['id'],
+                                         item_id=item['id']) }}">
+
+                    <label for="name-{{ item['id'] }}">Item Name</label>
+                    <input
+                        id="name-{{ item['id'] }}"
+                        name="name"
+                        value="{{ item['name'] }}"
+                        required
+                    >
+
+                    <label for="quantity-{{ item['id'] }}">Quantity</label>
+                    <input
+                        id="quantity-{{ item['id'] }}"
+                        type="number"
+                        name="quantity"
+                        min="0.001"
+                        step="0.001"
+                        value="{{ item['quantity'] }}"
+                        required
+                    >
+
+                    <label for="unit-price-{{ item['id'] }}">
+                        Unit Price (₹)
+                    </label>
+                    <input
+                        id="unit-price-{{ item['id'] }}"
+                        type="number"
+                        name="unit_price"
+                        min="0"
+                        step="0.01"
+                        value="{{ '%.2f'|format(item['unit_price_minor'] / 100) }}"
+                        required
+                    >
+
+                    <label for="item-total-{{ item['id'] }}">
+                        Item Total (₹)
+                    </label>
+                    <input
+                        id="item-total-{{ item['id'] }}"
+                        type="number"
+                        name="item_total"
+                        min="0"
+                        step="0.01"
+                        value="{{ '%.2f'|format(item['total_minor'] / 100) }}"
+                        required
+                    >
+
+                    <button type="submit">Save Item Changes</button>
+                </form>
+            </div>
+        {% else %}
+            <p>No line items found for this transaction.</p>
+        {% endfor %}
+    </div>
+
+
+    <div class="card">
+        <h2>Confirm transaction</h2>
+        <p>Check the extracted details before confirming.</p>
+        <p>Current status: <strong>{{ txn["status"] }}</strong></p>
+
+        {% if txn["status"] != "confirmed" %}
+            <form method="POST"
+                  action="{{ url_for('confirm_transaction_route', txn_id=txn['id']) }}"
+                  onsubmit="return confirm('Confirm this transaction?');">
+                <button class="confirm" type="submit">
+                    Confirm Transaction
+                </button>
+            </form>
+        {% else %}
+            <p>This transaction has already been confirmed.</p>
+        {% endif %}
+    </div>
+    <script>
+    document.querySelectorAll(".item form").forEach((form) => {
+        const quantity = form.querySelector('[name="quantity"]');
+        const unitPrice = form.querySelector('[name="unit_price"]');
+        const itemTotal = form.querySelector('[name="item_total"]');
+
+        function calculateItemTotal() {
+            if (quantity.value === "" || unitPrice.value === "") {
+                return;
+            }
+
+            const qty = Number(quantity.value);
+            const price = Number(unitPrice.value);
+
+            if (
+                Number.isFinite(qty) &&
+                Number.isFinite(price) &&
+                qty > 0 &&
+                price >= 0
+            ) {
+                itemTotal.value = (qty * price).toFixed(2);
+            }
+        }
+
+        quantity.addEventListener("input", calculateItemTotal);
+        unitPrice.addEventListener("input", calculateItemTotal);
+    });
+    </script>
+</body>
+</html>

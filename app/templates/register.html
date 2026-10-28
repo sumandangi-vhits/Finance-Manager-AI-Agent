@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Account | Finance Manager</title>
+</head>
+<body>
+    <h1>Create your account</h1>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <p>{{ message }}</p>
+    {% endfor %}
+
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Password (at least 8 characters)</label>
+        <input type="password" name="password" minlength="8" required>
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <p>Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+</body>
+</html>
