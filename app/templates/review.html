@@ -43,7 +43,7 @@
             font-weight: bold;
         }
         .confirm { background: #15803d; }
-        
+
         .message {
             padding: 10px;
             margin-bottom: 10px;
@@ -71,7 +71,7 @@
             <div class="message {{ category }}">{{ message }}</div>
         {% endfor %}
     {% endwith %}
-    
+
     {% if issues %}
         <div class="card">
             <h2>Information to Review</h2>
@@ -86,7 +86,7 @@
         </div>
     {% endif %}
 
-    
+
     {% if clarifications %}
         <div class="card">
             <h2>Clarification History</h2>
@@ -108,7 +108,7 @@
                         </p>
                     {% elif clarification["status"] == "unknown" %}
                         <p>The user could not provide this information.</p>
-                    
+
                     {% else %}
                         <p>Waiting for clarification.</p>
 
@@ -152,7 +152,7 @@
                                 </button>
                             </form>
                         {% endif %}
-                    {% endif %}        
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -189,7 +189,7 @@
         </form>
     </div>
 
-    
+
     <div class="card">
         <h2>Line Items</h2>
 
@@ -228,7 +228,7 @@
                         name="unit_price"
                         min="0"
                         step="0.01"
-                        value="{{ '%.2f'|format(item['unit_price_minor'] / 100) }}"
+                        value="{{ '%.2f'|format(item['unit_price_minor'] / 100) if item['unit_price_minor'] is not none else '' }}"
                         required
                     >
 
@@ -241,7 +241,7 @@
                         name="item_total"
                         min="0"
                         step="0.01"
-                        value="{{ '%.2f'|format(item['total_minor'] / 100) }}"
+                        value="{{ '%.2f'|format(item['total_minor'] / 100) if item['total_minor'] is not none else '' }}"
                         required
                     >
 

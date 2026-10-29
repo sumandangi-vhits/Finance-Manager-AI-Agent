@@ -8,7 +8,11 @@
 </head>
 <body>
     <h1>Your transactions</h1>
-    <p><a href="{{ url_for('index') }}">Back to dashboard</a></p>
+    <p>
+        <a href="{{ url_for('index') }}">Back to dashboard</a>
+        |
+        <a href="{{ url_for('export_transactions') }}">Export CSV</a>
+    </p>
 
     {% if transactions %}
     <table border="1" cellpadding="10">

@@ -1,6 +1,9 @@
 import tempfile
 from pathlib import Path
+import csv
+import io
 
+from flask import Response
 from flask import flash, request
 from werkzeug.utils import secure_filename
 from app.agents.finance_agent import ask_finance_agent
@@ -39,7 +42,7 @@ def create_app():
     app.config["UPLOAD_FOLDER"].mkdir(parents=True, exist_ok=True)
     init_db(app.config["DATABASE_PATH"])
     app.register_blueprint(auth_bp)
-    
+
     @app.route("/upload", methods=["GET", "POST"])
     def upload_receipt():
         if "user_id" not in session:
@@ -148,6 +151,76 @@ def create_app():
         finally:
             conn.close()
 
+    @app.route("/transactions/export")
+    def export_transactions():
+        if "user_id" not in session:
+            return redirect(url_for("auth.login"))
+
+        conn = get_connection(app.config["DATABASE_PATH"])
+
+        try:
+            rows = conn.execute(
+                """
+                SELECT
+                    id,
+                    merchant,
+                    txn_date,
+                    txn_time,
+                    total_minor,
+                    currency,
+                    category,
+                    payment_method,
+                    invoice_number,
+                    status
+                FROM transactions
+                WHERE user_id = ?
+                ORDER BY txn_date DESC, id DESC
+                """,
+                (session["user_id"],),
+            ).fetchall()
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+
+            writer.writerow([
+                "Transaction ID",
+                "Merchant",
+                "Date",
+                "Time",
+                "Amount",
+                "Currency",
+                "Category",
+                "Payment Method",
+                "Invoice Number",
+                "Status",
+            ])
+
+            for row in rows:
+                writer.writerow([
+                    row["id"],
+                    row["merchant"] or "",
+                    row["txn_date"] or "",
+                    row["txn_time"] or "",
+                    f'{(row["total_minor"] or 0) / 100:.2f}',
+                    row["currency"] or "",
+                    row["category"] or "",
+                    row["payment_method"] or "",
+                    row["invoice_number"] or "",
+                    row["status"] or "",
+                ])
+
+            response = Response(
+                "\ufeff" + output.getvalue(),
+                mimetype="text/csv; charset=utf-8",
+            )
+            response.headers["Content-Disposition"] = (
+                'attachment; filename="finance_transactions.csv"'
+            )
+            return response
+
+        finally:
+            conn.close()
+
     @app.route("/transactions")
     def transactions_page():
         if "user_id" not in session:
@@ -176,7 +249,7 @@ def create_app():
             if txn is None:
                 return "Transaction not found", 404
 
-            
+
             clarifications = get_clarifications(
                 conn, session["user_id"], txn_id
             )
@@ -205,7 +278,7 @@ def create_app():
         finally:
             conn.close()
 
-    
+
     @app.route(
         "/clarifications/<int:clarification_id>/answer",
         methods=["POST"],
@@ -265,7 +338,7 @@ def create_app():
         finally:
             conn.close()
 
-    
+
     @app.route("/transactions/<int:txn_id>/edit", methods=["POST"])
     def edit_transaction(txn_id):
         if "user_id" not in session:
@@ -310,7 +383,7 @@ def create_app():
         finally:
             conn.close()
 
-    
+
     @app.route("/transactions/<int:txn_id>/confirm", methods=["POST"])
     def confirm_transaction_route(txn_id):
         if "user_id" not in session:
@@ -407,7 +480,7 @@ def create_app():
             conn.close()
 
 
-    
+
     @app.route("/ask-finance", methods=["GET", "POST"])
     def ask_finance():
         if "user_id" not in session:

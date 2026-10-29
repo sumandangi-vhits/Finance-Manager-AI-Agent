@@ -11,8 +11,8 @@ from PIL import Image, UnidentifiedImageError
 from app.config import Config
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"}
-MAX_PAGES = 10        # limit work and AI cost per document
-MIN_TEXT_CHARS = 30   # less text than this in a PDF means it is probably a scan
+MAX_PAGES = 10
+MIN_TEXT_CHARS = 30
 
 
 class DocumentReadError(Exception):
@@ -39,7 +39,7 @@ def _finish(texts, page_count, method, warnings):
     return {
         "text": text,
         "page_count": page_count,
-        "method": method,  # "pdf_text" or "ocr"
+        "method": method,
         "warnings": warnings,
     }
 
@@ -67,7 +67,6 @@ def _read_pdf(path):
         texts = [pdf[i].get_text() for i in range(pages_to_read)]
         method = "pdf_text"
 
-        # Scanned PDF: almost no text layer, so read the page pictures with OCR
         if len("".join(texts).strip()) < MIN_TEXT_CHARS:
             method = "ocr"
             texts = []

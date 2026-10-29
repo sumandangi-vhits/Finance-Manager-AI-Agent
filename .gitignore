@@ -5,10 +5,8 @@ __pycache__/
 *.db
 uploads/
 .pytest_cache/
-# Local environment and secrets
 .env.*
 !.env.example
 
-# Python and test artifacts
 .coverage
 htmlcov/
