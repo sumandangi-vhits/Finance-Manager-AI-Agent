@@ -34,7 +34,7 @@ class TransactionIn(BaseModel):
     txn_date: Optional[date] = None
     txn_time: Optional[str] = None
     total_minor: Optional[int] = Field(default=None, ge=0)
-    currency: str = "INR"
+    currency: Optional[str] = None
     tax_minor: Optional[int] = Field(default=None, ge=0)
     discount_minor: Optional[int] = Field(default=None, ge=0)
     other_charges_minor: Optional[int] = Field(default=None, ge=0)
@@ -47,6 +47,9 @@ class TransactionIn(BaseModel):
     @field_validator("currency")
     @classmethod
     def currency_must_be_three_letters(cls, value):
+        if value is None:
+            return None
+
         value = value.strip().upper()
         if len(value) != 3 or not value.isalpha():
             raise ValueError("currency must be a 3-letter code such as INR")

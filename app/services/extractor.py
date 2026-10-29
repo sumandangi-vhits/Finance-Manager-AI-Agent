@@ -116,7 +116,7 @@ def to_transaction_dict(receipt):
 
     currency = receipt.currency
     if not currency:
-        currency = "INR"  # the database needs a currency, so default and flag it
+        currency = None
         uncertain.add("currency")
 
     category = receipt.category

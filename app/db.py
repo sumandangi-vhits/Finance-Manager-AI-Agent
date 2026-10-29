@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     txn_date TEXT,
     txn_time TEXT,
     total_minor INTEGER,
-    currency TEXT NOT NULL DEFAULT 'INR',
+    currency TEXT DEFAULT NULL,
     tax_minor INTEGER,
     discount_minor INTEGER,
     other_charges_minor INTEGER,
@@ -96,7 +96,6 @@ def get_connection(db_path=None):
     """Open a SQLite connection. Rows behave like dictionaries."""
     conn = sqlite3.connect(db_path or Config.DATABASE_PATH)
     conn.row_factory = sqlite3.Row
-    # SQLite ignores foreign keys unless this is switched on for EACH connection
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 

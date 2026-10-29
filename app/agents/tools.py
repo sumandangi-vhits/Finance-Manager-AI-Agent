@@ -13,6 +13,15 @@ def get_spending_summary(user_id, db_path, start_date=None, end_date=None):
             FROM transactions
             WHERE user_id = ?
               AND status = 'confirmed'
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM clarifications AS c
+                  WHERE c.user_id = transactions.user_id
+                    AND c.transaction_id = transactions.id
+                    AND c.field_name = 'duplicate'
+                    AND c.status = 'answered'
+                    AND c.answer = 'duplicate'
+              )
         """
         params = [user_id]
 
@@ -92,6 +101,15 @@ def get_category_spending(
             WHERE user_id = ?
               AND status IN ('confirmed', 'corrected')
               AND total_minor IS NOT NULL
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM clarifications AS c
+                  WHERE c.user_id = transactions.user_id
+                    AND c.transaction_id = transactions.id
+                    AND c.field_name = 'duplicate'
+                    AND c.status = 'answered'
+                    AND c.answer = 'duplicate'
+              )
         """
         params = [user_id]
 
@@ -150,6 +168,15 @@ def get_largest_purchases(
             WHERE user_id = ?
               AND status IN ('confirmed', 'corrected')
               AND total_minor IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM clarifications AS c
+                WHERE c.user_id = transactions.user_id
+                  AND c.transaction_id = transactions.id
+                  AND c.field_name = 'duplicate'
+                  AND c.status = 'answered'
+                  AND c.answer = 'duplicate'
+            )
         """
         params = [user_id]
 
@@ -207,6 +234,15 @@ def get_average_spending(
             WHERE user_id = ?
               AND status IN ('confirmed', 'corrected')
               AND total_minor IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM clarifications AS c
+                WHERE c.user_id = transactions.user_id
+                  AND c.transaction_id = transactions.id
+                  AND c.field_name = 'duplicate'
+                  AND c.status = 'answered'
+                  AND c.answer = 'duplicate'
+            )
         """
         params = [user_id]
 
@@ -272,6 +308,15 @@ def get_frequently_purchased_items(
               AND li.user_id = ?
               AND t.status IN ('confirmed', 'corrected')
               AND li.total_minor IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM clarifications AS c
+                WHERE c.user_id = t.user_id
+                  AND c.transaction_id = t.id
+                  AND c.field_name = 'duplicate'
+                  AND c.status = 'answered'
+                  AND c.answer = 'duplicate'
+            )
         """
         params = [user_id, user_id]
 
@@ -335,6 +380,15 @@ def get_recurring_expenses(
               AND total_minor IS NOT NULL
               AND merchant IS NOT NULL
               AND TRIM(merchant) != ''
+            AND NOT EXISTS (
+                SELECT 1
+                FROM clarifications AS c
+                WHERE c.user_id = transactions.user_id
+                  AND c.transaction_id = transactions.id
+                  AND c.field_name = 'duplicate'
+                  AND c.status = 'answered'
+                  AND c.answer = 'duplicate'
+            )
         """
         params = [user_id]
 

@@ -480,3 +480,40 @@ def test_user_cannot_answer_another_users_clarification(env):
     assert result is False
     assert records[0]["status"] == "pending"
     assert records[0]["answer"] is None
+
+def test_duplicate_clarification_records_decision_without_editing_transaction(env):
+    txn_id = tx.create_transaction(
+        env.conn,
+        env.a,
+        {
+            "merchant": "Demo Mart",
+            "txn_date": "2026-10-12",
+            "total_minor": 16000,
+            "currency": "INR",
+            "uncertain_fields": [],
+        },
+    )
+
+    clarification_id = tx.create_clarification(
+        env.conn,
+        env.a,
+        txn_id,
+        "duplicate",
+        "Is this transaction a duplicate or a separate purchase?",
+    )
+
+    result = tx.answer_clarification(
+        env.conn,
+        env.a,
+        clarification_id,
+        "duplicate",
+    )
+
+    records = tx.get_clarifications(env.conn, env.a, txn_id)
+    transaction = tx.get_transaction(env.conn, env.a, txn_id)
+
+    assert result is True
+    assert records[0]["status"] == "answered"
+    assert records[0]["answer"] == "duplicate"
+    assert transaction["total_minor"] == 16000
+    assert transaction["merchant"] == "Demo Mart"

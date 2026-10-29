@@ -86,10 +86,13 @@ def test_to_transaction_dict_converts_and_validates():
     TransactionIn(**data)  # must be accepted by our database model
 
 
-def test_missing_currency_defaults_and_is_flagged():
-    data = to_transaction_dict(ExtractedReceipt(merchant="X", currency=None))
-    assert data["currency"] == "INR"
+def test_missing_currency_stays_none_and_is_flagged():
+    data = to_transaction_dict(
+        ExtractedReceipt(merchant="X", currency=None)
+    )
+    assert data["currency"] is None
     assert "currency" in data["uncertain_fields"]
+    TransactionIn(**data)
 
 
 def test_bad_date_becomes_none_and_is_flagged():

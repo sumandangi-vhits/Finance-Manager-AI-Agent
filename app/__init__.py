@@ -88,6 +88,7 @@ def create_app():
                     "No new transaction was created.",
                     "warning",
                 )
+
                 return redirect(url_for("transactions_page"))
 
             for warning in result.get("warnings", []):

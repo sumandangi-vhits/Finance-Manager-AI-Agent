@@ -7,6 +7,7 @@ from app.agents.tools import (
     get_frequently_purchased_items,
 )
 from app.agents.tools import get_recurring_expenses
+from app.agents.tools import get_spending_summary
 
 def test_largest_purchases_are_sorted_and_exclude_pending(tmp_path):
     db_path = tmp_path / "analytics.db"
@@ -218,3 +219,55 @@ def test_recurring_expenses_groups_repeated_merchants(tmp_path):
     assert results[0]["total_amount"] == 550.0
     assert results[0]["average_amount"] == 275.0
     assert results[0]["possible_recurring"] is True
+
+
+def test_spending_summary_excludes_only_confirmed_duplicate_decisions(tmp_path):
+    db_path = tmp_path / "duplicate_analytics.db"
+    init_db(db_path)
+    conn = get_connection(db_path)
+
+    try:
+        user_id = users.create_user(
+            conn, "duplicate-analytics@example.com", "test-hash"
+        )
+
+        decisions = [
+            ("Regular Shop", 10000, None),
+            ("Duplicate Shop", 20000, "duplicate"),
+            ("Repeat Purchase Shop", 30000, "separate_purchase"),
+        ]
+
+        for merchant, amount, decision in decisions:
+            txn_id = tx.create_transaction(
+                conn,
+                user_id,
+                {
+                    "merchant": merchant,
+                    "txn_date": "2026-10-12",
+                    "total_minor": amount,
+                    "currency": "INR",
+                    "uncertain_fields": [],
+                    "items": [],
+                },
+            )
+            tx.confirm_transaction(conn, user_id, txn_id)
+
+            if decision:
+                clarification_id = tx.create_clarification(
+                    conn,
+                    user_id,
+                    txn_id,
+                    "duplicate",
+                    "Is this a duplicate or a separate purchase?",
+                )
+                tx.answer_clarification(
+                    conn, user_id, clarification_id, decision
+                )
+    finally:
+        conn.close()
+
+    result = get_spending_summary(user_id, db_path)
+
+    assert result["transaction_count"] == 2
+    assert result["total_minor"] == 40000
+    assert result["total_amount"] == 400.0
