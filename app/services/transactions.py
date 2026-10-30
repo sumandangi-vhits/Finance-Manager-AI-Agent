@@ -63,9 +63,6 @@ def _log_correction(
         ),
     )
 
-
-# ---------- create ----------
-
 def create_transaction(conn, user_id, data, document_id=None):
     """Validate and save a transaction with its line items.
     New records always start as 'pending'. Returns the new transaction id."""

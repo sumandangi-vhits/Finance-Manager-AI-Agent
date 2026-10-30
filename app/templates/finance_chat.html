@@ -3,88 +3,904 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance AI Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Finance Assistant | FinTrack AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #f5f7fb;
-            color: #222;
+        :root {
+            --navy: #1e293b;
+            --green: #10a37f;
+            --green-soft: #e0f5ef;
+            --purple: #5965dc;
+            --page: #f4f6fa;
+            --text: #172033;
+            --muted: #6b7280;
+            --border: #e2e6ed;
         }
-        .card {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px #0000000d;
-            margin-bottom: 20px;
-        }
-        textarea {
+
+        * {
             box-sizing: border-box;
-            width: 100%;
-            min-height: 110px;
-            padding: 12px;
-            border: 1px solid #ccd2dc;
-            border-radius: 8px;
-            font: inherit;
         }
-        button {
-            background: #2563eb;
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background: var(--page);
+        }
+
+        /* SIDEBAR - SAME AS DASHBOARD */
+
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 10px;
+            color: #e8edf5;
+            background: var(--navy);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px 25px;
             color: white;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            color: var(--green);
+            font-size: 23px;
+        }
+
+        .nav-links {
+            display: grid;
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 42px;
+            padding: 0 12px;
+            border-radius: 8px;
+            color: #d5dce7;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 400;
+            transition: background .2s, color .2s;
+        }
+
+        .nav-link i {
+            width: 18px;
+            font-size: 16px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,.12);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .sidebar-bottom form {
+            margin: 0;
+        }
+
+        .logout-button {
+            width: 100%;
             border: 0;
-            padding: 12px 20px;
-            margin-top: 12px;
-            border-radius: 7px;
+            background: transparent;
+            text-align: left;
             cursor: pointer;
+            font-family: inherit;
         }
+
+        /* MAIN AREA - SAME AS DASHBOARD */
+
+        .main-area {
+            margin-left: 250px;
+            min-height: 100vh;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 64px;
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: white;
+            background: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* CHAT CONTENT */
+
+        .content {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .chat-card {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(20,31,50,.045);
+        }
+
+        .chat-area {
+            flex: 1;
+            min-height: 180px;
+            min-width: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 25px 22px;
+            background: #f8f9fc;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .welcome {
+            margin: auto;
+            text-align: center;
+            max-width: 450px;
+            padding: 25px 10px;
+        }
+
+        .welcome-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--green-soft);
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            margin: 0 auto 15px;
+        }
+
+        .welcome h2 {
+            font-size: 19px;
+            font-weight: 600;
+            margin: 0 0 9px;
+            color: var(--text);
+        }
+
+        .welcome p {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* CHAT MESSAGES */
+
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            width: fit-content;
+            max-width: 85%;
+            min-width: 0;
+            align-items: flex-start;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+        }
+
+        .assistant .message-avatar {
+            background: var(--green);
+            color: white;
+        }
+
+        .user .message-avatar {
+            background: #e4eaf3;
+            color: #42516b;
+        }
+
+        .message-bubble {
+            min-width: 0;
+            max-width: 100%;
+            padding: 12px 14px;
+            border-radius: 11px;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .user .message-bubble {
+            background: var(--purple);
+            color: white;
+            border-top-right-radius: 3px;
+        }
+
+        .assistant .message-bubble {
+            background: white;
+            color: #252d3a;
+            border: 1px solid var(--border);
+            border-top-left-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.03);
+        }
+
+        /* AI RESPONSE FORMATTING */
+
         .answer {
+            min-width: 0;
+            max-width: 100%;
+            width: 100%;
+            font-family: Inter, Arial, sans-serif;
+            font-size: 13px;
+            line-height: 1.7;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+
+        .answer p {
+            margin: 0 0 10px;
+            text-align: left;
+        }
+
+        .answer p:last-child {
+            margin-bottom: 0;
+        }
+
+        .answer ul,
+        .answer ol {
+            margin: 7px 0 10px;
+            padding-left: 22px;
+        }
+
+        .answer li {
+            margin-bottom: 4px;
+        }
+
+        .answer h1,
+        .answer h2,
+        .answer h3,
+        .answer h4 {
+            margin: 10px 0 7px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .answer strong {
+            font-weight: 700;
+        }
+
+        .answer pre {
+            max-width: 100%;
+            overflow-x: auto;
             white-space: pre-wrap;
-            line-height: 1.6;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            background: #f3f5f8;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
         }
-        .message {
-            padding: 12px;
-            background: #fee2e2;
+
+        .answer code {
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .answer table {
+            display: block;
+            max-width: 100%;
+            overflow-x: auto;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin: 10px 0;
+        }
+
+        .answer th,
+        .answer td {
+            border: 1px solid var(--border);
+            padding: 7px;
+            text-align: left;
+        }
+
+        .answer th {
+            background: #f3f5f8;
+        }
+
+        .answer img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* QUICK PROMPTS */
+
+        .quick-prompts {
+            padding: 12px 14px 9px;
+            background: white;
+            border-top: 1px solid #e8ebf0;
+        }
+
+        .quick-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 9px;
+        }
+
+        .prompt-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .prompt-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 12px;
+            border: 1px solid #626db0;
+            border-radius: 10px;
+            background: white;
+            color: #313b50;
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .prompt-btn:hover {
+            background: #f0f1fc;
+            border-color: #4755a8;
+        }
+
+        .prompt-btn i {
+            color: #5865bd;
+            font-size: 13px;
+        }
+
+        /* FLASH MESSAGES */
+
+        .flash-message {
+            padding: 10px 13px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .flash-message.error {
+            background: #fdecec;
+            color: #b52f36;
+        }
+
+        .flash-message.warning {
+            background: #fff5df;
+            color: #94630c;
+        }
+
+        .flash-message.success {
+            background: #e8f8ef;
+            color: #167448;
+        }
+
+        .flash-message.info {
+            background: #eaf2ff;
+            color: #285da8;
+        }
+
+        /* MESSAGE INPUT */
+
+        .input-area {
+            padding: 11px 14px 13px;
+            background: white;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+            height: 43px;
+            padding: 10px 13px;
+            border: 1px solid #cfd3dc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(16,163,127,.08);
+        }
+
+        .send-btn {
+            height: 43px;
+            padding: 0 19px;
+            background: var(--green);
+            color: white;
+            border: none;
             border-radius: 7px;
-            margin-bottom: 12px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+            white-space: nowrap;
         }
-        a { color: #2563eb; }
+
+        .send-btn:hover {
+            background: #0b8e6c;
+        }
+
+        .send-btn:disabled {
+            opacity: .65;
+            cursor: wait;
+        }
+
+        /* RESPONSIVE - SAME BREAKPOINTS AS DASHBOARD */
+
+        @media (max-width: 1050px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-area {
+                margin-left: 220px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                width: 68px;
+                padding: 16px 8px;
+            }
+
+            .brand {
+                justify-content: center;
+                padding: 0 0 25px;
+            }
+
+            .brand-name,
+            .nav-link span {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 0;
+            }
+
+            .main-area {
+                margin-left: 68px;
+            }
+
+            .topbar {
+                height: 58px;
+                min-height: 58px;
+                padding: 0 14px;
+            }
+
+            .content {
+                padding: 13px;
+            }
+
+            .profile {
+                font-size: 11px;
+            }
+
+            .profile span:nth-child(2) {
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .chat-area {
+                padding: 16px 12px;
+            }
+
+            .chat-message {
+                max-width: 96%;
+            }
+
+            .prompt-list {
+                gap: 7px;
+            }
+
+            .prompt-btn {
+                font-size: 10px;
+                padding: 7px 9px;
+            }
+
+            .send-btn {
+                padding: 0 13px;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <p><a href="{{ url_for('index') }}">← Back to dashboard</a></p>
 
-    <h1>Finance AI Assistant</h1>
-    <p>Ask questions about your recorded financial transactions.</p>
+<div class="app-shell">
 
-    <div class="card">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="message">{{ message }}</div>
-            {% endfor %}
-        {% endwith %}
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-        <form method="POST">
-            <label for="question">Your finance question</label>
-            <textarea
-                id="question"
-                name="question"
-                placeholder="Example: How much did I spend this month?"
-                required
-            >{{ question }}</textarea>
+        <div class="brand">
+            <span class="brand-icon">
+                <i class="bi bi-bar-chart-fill"></i>
+            </span>
+            <span class="brand-name">FinTrack AI</span>
+        </div>
 
-            <button type="submit">Ask Finance Agent</button>
-        </form>
+        <nav class="nav-links">
+
+            <a class="nav-link" href="{{ url_for('index') }}">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('transactions_page') }}">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transactions</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('upload_receipt') }}">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Receipt</span>
+            </a>
+
+            <a class="nav-link active" href="{{ url_for('ask_finance') }}">
+                <i class="bi bi-chat-square-dots"></i>
+                <span>Assistant</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <form method="POST" action="{{ url_for('auth.logout') }}">
+                <button class="nav-link logout-button" type="submit">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-area">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <h1 class="page-title">AI Finance Assistant</h1>
+
+            <div class="profile">
+
+                <span class="avatar">
+                    {{ (session.get('user_email', 'U') or 'U')[0]|upper }}
+                </span>
+
+                <span>{{ session.get('user_email', 'Account') }}</span>
+
+                <i class="bi bi-chevron-down"></i>
+
+            </div>
+
+        </header>
+
+        <main class="content">
+
+            <section class="chat-card">
+
+                <!-- CONVERSATION AREA -->
+                <div class="chat-area" id="chatArea">
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+
+                    {% if answer %}
+
+                        {% if question %}
+                            <div class="chat-message user">
+
+                                <div class="message-avatar">
+                                    <i class="bi bi-person"></i>
+                                </div>
+
+                                <div class="message-bubble">
+                                    {{ question }}
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                        <div class="chat-message assistant">
+
+                            <div class="message-avatar">
+                                <i class="bi bi-stars"></i>
+                            </div>
+
+                            <div class="message-bubble answer" id="aiAnswer">{{ answer }}</div>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="welcome">
+
+                            <div class="welcome-icon">
+                                <i class="bi bi-stars"></i>
+                            </div>
+
+                            <h2>Your AI Finance Assistant</h2>
+
+                            <p>
+                                Ask questions about your recorded transactions,
+                                spending habits, expenses, and financial activity.
+                                I'm here to help you understand your finances.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+                <!-- QUICK PROMPTS -->
+                <div class="quick-prompts">
+
+                    <div class="quick-title">Quick Prompts</div>
+
+                    <div class="prompt-list">
+
+                        <button
+                            type="button"
+                            class="prompt-btn"
+                            data-question="Show my savings rate based on my recorded financial data."
+                        >
+                            <i class="bi bi-currency-rupee"></i>
+                            Show my savings rate
+                        </button>
+
+                        <button
+                            type="button"
+                            class="prompt-btn"
+                            data-question="Compare my spending with September."
+                        >
+                            <i class="bi bi-graph-up-arrow"></i>
+                            Compare spending to September
+                        </button>
+
+                        <button
+                            type="button"
+                            class="prompt-btn"
+                            data-question="List my top 5 expenses."
+                        >
+                            <i class="bi bi-list-ol"></i>
+                            List top 5 expenses
+                        </button>
+
+                        <button
+                            type="button"
+                            class="prompt-btn"
+                            data-question="Show my pending receipts and transactions."
+                        >
+                            <i class="bi bi-file-earmark-text"></i>
+                            Review pending receipts
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- MESSAGE INPUT -->
+                <div class="input-area">
+
+                    <form method="POST" id="financeForm" class="chat-form">
+
+                        <input
+                            type="text"
+                            id="question"
+                            name="question"
+                            class="chat-input"
+                            placeholder="Ask anything about your finances..."
+                            maxlength="1000"
+                            value=""
+                            required
+                            autocomplete="off"
+                        >
+
+                        <button type="submit" class="send-btn" id="sendBtn">
+                            Send
+                            <i class="bi bi-send"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+        </main>
+
     </div>
 
-    {% if answer %}
-        <div class="card">
-            <h2>Answer</h2>
-            <div class="answer">
-                {{ answer | replace('**', '') | replace('* ', '• ') }}
-            </div>
-        </div>
-    {% endif %}
+</div>
+
+<!-- MARKDOWN LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- HTML SANITIZER -->
+<script src="https://unpkg.com/dompurify@3.2.6/dist/purify.min.js"></script>
+
+<script>
+    const questionInput = document.getElementById("question");
+    const financeForm = document.getElementById("financeForm");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Quick prompt buttons
+    document.querySelectorAll(".prompt-btn").forEach(button => {
+
+        button.addEventListener("click", function() {
+            questionInput.value = this.dataset.question;
+            questionInput.focus();
+        });
+
+    });
+
+    // Submit form
+    financeForm.addEventListener("submit", function(event) {
+
+        if (!questionInput.value.trim()) {
+            event.preventDefault();
+            return;
+        }
+
+        sendBtn.disabled = true;
+        sendBtn.innerHTML =
+            '<i class="bi bi-hourglass-split"></i> Thinking...';
+
+    });
+
+    // Clean and format Gemini Markdown response
+    const answerElement = document.getElementById("aiAnswer");
+
+    if (
+        answerElement &&
+        typeof marked !== "undefined" &&
+        typeof DOMPurify !== "undefined"
+    ) {
+
+        let rawAnswer = answerElement.textContent || "";
+
+        // Normalize line endings and whitespace
+        rawAnswer = rawAnswer
+            .replace(/\r\n/g, "\n")
+            .replace(/\u00a0/g, " ")
+            .replace(/\u2007/g, " ")
+            .replace(/\u202f/g, " ")
+            .trim();
+
+        // Remove accidental indentation from every line
+        rawAnswer = rawAnswer
+            .split("\n")
+            .map(line => line.replace(/^[ \t]+/, ""))
+            .join("\n");
+
+        // Remove accidental wrapping code fences
+        rawAnswer = rawAnswer
+            .replace(/^```(?:markdown|md|text)?[ \t]*\n/i, "")
+            .replace(/\n```[ \t]*$/i, "");
+
+        // Convert Markdown to HTML
+        const formattedHTML = marked.parse(rawAnswer, {
+            breaks: true,
+            gfm: true
+        });
+
+        // Sanitize HTML before displaying
+        answerElement.innerHTML =
+            DOMPurify.sanitize(formattedHTML);
+
+    }
+
+    // Scroll to latest conversation content
+    const chatArea = document.getElementById("chatArea");
+
+    if (chatArea) {
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+</script>
+
 </body>
 </html>

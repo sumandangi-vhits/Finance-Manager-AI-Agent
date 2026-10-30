@@ -4,25 +4,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Account | Finance Manager</title>
+    <title>Create Account | FinTrack AI</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #f3f4f8;
+            font-family: 'Inter', sans-serif;
+            color: #171b24;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 330px;
+            background: white;
+            border: 1px solid #e0e2e8;
+            border-radius: 10px;
+            padding: 27px 19px 25px;
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.06);
+        }
+
+        .brand {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .brand i {
+            color: #12a77e;
+            font-size: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            height: 35px;
+            padding: 8px 11px;
+            border: 1px solid #aeb2b9;
+            border-radius: 7px;
+            outline: none;
+            font-family: inherit;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #0fa77e;
+            box-shadow: 0 0 0 3px rgba(15, 167, 126, 0.09);
+        }
+
+        .submit-btn {
+            width: 100%;
+            height: 37px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 7px;
+            background: #12a77e;
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #0d906d;
+        }
+
+        .footer {
+            margin-top: 21px;
+            text-align: center;
+            font-size: 12px;
+            color: #303744;
+        }
+
+        .footer a {
+            color: #46549c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 13px;
+            border-radius: 6px;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .flash-message.error {
+            background: #fdecec;
+            color: #b52f36;
+        }
+
+        .flash-message.success {
+            background: #e8f8ef;
+            color: #167448;
+        }
+
+        .flash-message.warning {
+            background: #fff5df;
+            color: #94630c;
+        }
+
+        .flash-message.info {
+            background: #eaf2ff;
+            color: #285da8;
+        }
+
+        .password-hint {
+            color: #818997;
+            font-size: 10px;
+            margin-top: 6px;
+        }
+
+        @media (max-width: 400px) {
+            .auth-card {
+                padding: 25px 17px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Create your account</h1>
 
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-        <p>{{ message }}</p>
-    {% endfor %}
+    <main class="auth-card">
 
-    <form method="POST">
-        <label>Email</label>
-        <input type="email" name="email" required>
+        <div class="brand">
+            <i class="bi bi-stack"></i>
+            <span>FinTrack AI</span>
+        </div>
 
-        <label>Password (at least 8 characters)</label>
-        <input type="password" name="password" minlength="8" required>
+        <h1>Create your account</h1>
 
-        <button type="submit">Create Account</button>
-    </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
 
-    <p>Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+        <form method="POST">
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="john.doe@example.com"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <p class="password-hint">
+                    Password must contain at least 8 characters.
+                </p>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Create Account
+            </button>
+
+        </form>
+
+        <div class="footer">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}">Sign In</a>
+        </div>
+
+    </main>
+
 </body>
 </html>

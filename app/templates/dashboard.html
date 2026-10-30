@@ -1,134 +1,1084 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard | Finance Manager AI</title>
+    <title>Dashboard | FinTrack AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
     <style>
-        * { box-sizing: border-box; }
+        :root {
+            --navy: #1e293b;
+            --green: #10a37f;
+            --green-soft: #e0f5ef;
+            --purple: #5965dc;
+            --page: #f4f6fa;
+            --text: #172033;
+            --muted: #6b7280;
+            --border: #e2e6ed;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #182230;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background: var(--page);
         }
-        header {
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 20;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            padding: 18px 10px;
+            color: #e8edf5;
+            background: #1e293b;
+        }
+
+        .brand {
+            display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 20px 5%;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
+            gap: 10px;
+            padding: 0 10px 25px;
+            color: white;
+            font-size: 19px;
+            font-weight: 700;
         }
-        header h2 { margin: 0; }
-        main { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
-        .muted { color: #667085; }
-        .cards {
+
+        .brand-icon {
+            width: 28px;
+            height: 28px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 18px;
-            margin: 24px 0;
+            place-items: center;
+            color: #10a37f;
+            font-size: 23px;
         }
-        .card, .panel {
-            background: white;
-            padding: 22px;
-            border-radius: 14px;
-            border: 1px solid #e5e7eb;
+
+        .nav-links {
+            display: grid;
+            gap: 6px;
         }
-        .card p { margin-bottom: 8px; color: #667085; }
-        .value { font-size: 28px; font-weight: bold; }
-        .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-        a.button, button {
-            display: inline-block;
-            padding: 11px 16px;
-            border: 0;
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 42px;
+            padding: 0 12px;
             border-radius: 8px;
-            background: #2357e7;
+            color: #d5dce7;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .nav-link i {
+            width: 18px;
+            font-size: 16px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,.12);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        /* MAIN */
+
+        .main-area {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: white;
+            background: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        /* WELCOME */
+
+        .welcome-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-row h2 {
+            margin: 0 0 5px;
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .welcome-row p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 14px;
+            border-radius: 7px;
+            background: var(--green);
             color: white;
             text-decoration: none;
-            cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
+            font-weight: 600;
         }
-        .secondary { background: #eef2ff !important; color: #2345a5 !important; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { text-align: left; padding: 14px 8px; border-bottom: 1px solid #eee; }
-        th { color: #667085; font-size: 13px; }
-        .status { color: #9a6700; background: #fff4ce; padding: 5px 8px; border-radius: 20px; }
-        .warning { margin-top: 18px; padding: 14px; background: #fff8e6; border-radius: 10px; }
-        @media (max-width: 600px) {
-            header { align-items: flex-start; }
-            table { font-size: 13px; }
-            th, td { padding: 10px 4px; }
+
+        .action-btn.secondary {
+            background: #eef2ff;
+            color: #4653b8;
+        }
+
+        /* KPI CARDS */
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .kpi-card {
+            position: relative;
+            min-height: 105px;
+            padding: 17px;
+            background: white;
+            border: 1px solid var(--border);
+            border-bottom: 4px solid var(--green);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(20,31,50,.045);
+        }
+
+        .kpi-label {
+            color: #4b5563;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-size: clamp(20px, 2vw, 25px);
+            font-weight: 600;
+            letter-spacing: -.7px;
+        }
+
+        .kpi-icon {
+            position: absolute;
+            right: 14px;
+            top: 14px;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            color: #078b6c;
+            background: var(--green-soft);
+            border-radius: 6px;
+        }
+
+        /* ANALYTICS */
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .panel {
+            min-width: 0;
+            padding: 17px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(20,31,50,.045);
+        }
+
+        .panel h3 {
+            margin: 0 0 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 230px;
+        }
+
+        /* TABLE */
+
+        .transactions-panel {
+            overflow: hidden;
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .panel-heading h3 {
+            margin: 0;
+        }
+
+        .view-all {
+            color: #5260c9;
+            font-size: 12px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 570px;
+        }
+
+        thead {
+            background: #f7f8fa;
+        }
+
+        th, td {
+            padding: 13px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e8ebf0;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        th {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        td {
+            color: #4b5563;
+        }
+
+        .amount {
+            text-align: right;
+            font-weight: 500;
+            color: #202938;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #e6f6ef;
+            color: #087b59;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status.pending,
+        .status.needs_review {
+            background: #fff4d8;
+            color: #946200;
+        }
+
+        .review-link {
+            color: #5360c7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            padding: 25px 8px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .warning {
+            margin-bottom: 15px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: #fff7e5;
+            border: 1px solid #f4dfaa;
+            color: #805b0a;
+            font-size: 12px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1050px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-area {
+                margin-left: 220px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                width: 68px;
+                padding: 16px 8px;
+            }
+
+            .brand {
+                justify-content: center;
+                padding: 0 0 25px;
+            }
+
+            .brand-name,
+            .nav-link span {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 0;
+            }
+
+            .main-area {
+                margin-left: 68px;
+            }
+
+            .topbar {
+                height: 58px;
+                padding: 0 14px;
+            }
+
+            .content {
+                padding: 13px;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid {
+                gap: 9px;
+            }
+
+            .kpi-card {
+                min-height: 85px;
+                padding: 11px;
+            }
+
+            .kpi-label {
+                font-size: 10px;
+            }
+
+            .kpi-value {
+                font-size: 19px;
+            }
+
+            .chart-wrap {
+                height: 190px;
+            }
+
+            .profile {
+                font-size: 11px;
+            }
         }
     </style>
 </head>
+
 <body>
-<header>
-    <h2>Finance Manager AI</h2>
-    <form method="POST" action="{{ url_for('auth.logout') }}">
-        <button type="submit" class="secondary">Log out</button>
-    </form>
-</header>
 
-<main>
-    <h1>Your finances at a glance</h1>
-    <p class="muted">Welcome, {{ email }}. Review your spending and manage your receipts.</p>
+<div class="app-shell">
 
-    
-    <div class="actions">
-        <a class="button" href="{{ url_for('upload_receipt') }}">+ Upload receipt</a>
-        <a class="button secondary" href="{{ url_for('transactions_page') }}">View all transactions</a>
-        <a class="button" href="{{ url_for('ask_finance') }}">Finance AI Assistant</a>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <span class="brand-icon">
+                <i class="bi bi-bar-chart-fill"></i>
+            </span>
+            <span class="brand-name">FinTrack AI</span>
+        </div>
+
+        <nav class="nav-links">
+
+            <a class="nav-link active" href="{{ url_for('index') }}">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('transactions_page') }}">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transactions</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('upload_receipt') }}">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Receipt</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('ask_finance') }}">
+                <i class="bi bi-chat-square-dots"></i>
+                <span>Assistant</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <form method="POST" action="{{ url_for('auth.logout') }}">
+
+                <button
+                    class="nav-link"
+                    type="submit"
+                    style="width:100%;border:0;background:transparent;text-align:left;cursor:pointer;font-family:inherit;"
+                >
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-area">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <h1 class="page-title">Dashboard</h1>
+
+            <div class="profile">
+
+                <span class="avatar">
+                    {{ (email or 'U')[0]|upper }}
+                </span>
+
+                <span>{{ email }}</span>
+
+                <i class="bi bi-chevron-down"></i>
+
+            </div>
+
+        </header>
+
+        <main class="content">
+
+            <!-- WELCOME SECTION -->
+            <section class="welcome-row">
+
+                <div>
+
+                    <h2>Your finances at a glance</h2>
+
+                    <p>
+                        Track your spending and manage your receipts in one place.
+                    </p>
+
+                </div>
+
+                <div class="quick-actions">
+
+                    <a class="action-btn" href="{{ url_for('upload_receipt') }}">
+                        <i class="bi bi-plus-lg"></i>
+                        Upload Receipt
+                    </a>
+
+                    <a class="action-btn secondary" href="{{ url_for('transactions_page') }}">
+                        View Transactions
+                    </a>
+
+                </div>
+
+            </section>
+
+            <!-- KPI CARDS -->
+            <section class="kpi-grid">
+
+                <article class="kpi-card">
+
+                    <span class="kpi-icon">
+                        <i class="bi bi-currency-rupee"></i>
+                    </span>
+
+                    <div class="kpi-label">
+                        Total Spending
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ total_spending }}
+                    </div>
+
+                </article>
+
+                <article class="kpi-card">
+
+                    <span class="kpi-icon">
+                        <i class="bi bi-receipt"></i>
+                    </span>
+
+                    <div class="kpi-label">
+                        Total Transactions
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ transaction_count }}
+                    </div>
+
+                </article>
+
+                <article class="kpi-card">
+
+                    <span class="kpi-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </span>
+
+                    <div class="kpi-label">
+                        Pending Reviews
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ pending_count }}
+                    </div>
+
+                </article>
+
+                <article class="kpi-card">
+
+                    <span class="kpi-icon">
+                        <i class="bi bi-calendar2-month"></i>
+                    </span>
+
+                    <div class="kpi-label">
+                        Current Month Spending
+                    </div>
+
+                    <div class="kpi-value">
+                        ₹{{ "{:,.2f}".format(monthly_summary.total_amount) }}
+                    </div>
+
+                </article>
+
+            </section>
+
+            <!-- PENDING WARNING -->
+            {% if pending_count %}
+
+            <div class="warning">
+
+                <i class="bi bi-exclamation-circle"></i>
+
+                <strong>Action needed:</strong>
+
+                You have {{ pending_count }} transaction(s) awaiting review.
+
+                AI-extracted details should be checked before confirmation.
+
+            </div>
+
+            {% endif %}
+
+            <!-- ANALYTICS -->
+            <section class="analytics-grid">
+
+                <!-- MONTHLY SPENDING -->
+                <article class="panel">
+
+                    <h3>Spending Trends (Monthly)</h3>
+
+                    <div class="chart-wrap">
+                        <canvas id="monthlySpendingChart"></canvas>
+                    </div>
+
+                </article>
+
+                <!-- CATEGORY BREAKDOWN -->
+                <article class="panel">
+
+                    <h3>Category Breakdown</h3>
+
+                    {% if category_spending %}
+
+                    <div class="chart-wrap">
+                        <canvas id="categorySpendingChart"></canvas>
+                    </div>
+
+                    {% else %}
+
+                    <div class="empty-state">
+                        No category spending data available yet.
+                    </div>
+
+                    {% endif %}
+
+                </article>
+
+            </section>
+
+            <!-- RECENT TRANSACTIONS -->
+            <section class="panel transactions-panel">
+
+                <div class="panel-heading">
+
+                    <h3>Recent Transactions</h3>
+
+                    <a class="view-all" href="{{ url_for('transactions_page') }}">
+                        View all
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+                {% if transactions %}
+
+                <div class="table-scroll">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Date</th>
+                                <th>Merchant</th>
+                                <th>Category</th>
+                                <th class="amount">Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for txn in transactions %}
+
+                            <tr>
+
+                                <td>
+                                    {{ txn.txn_date or "Unknown date" }}
+                                </td>
+
+                                <td>
+                                    {{ txn.merchant or "Unknown merchant" }}
+                                </td>
+
+                                <td>
+                                    {{ txn.category or "Uncategorized" }}
+                                </td>
+
+                                <td class="amount">
+                                    {{ txn.currency }}
+                                    {{ "%.2f"|format((txn.total_minor or 0) / 100) }}
+                                </td>
+
+                                <td>
+
+                                    <span class="status {{ (txn.status or '')|lower|replace(' ', '_') }}">
+                                        {{ txn.status or "Unknown" }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <a
+                                        class="review-link"
+                                        href="{{ url_for('review_transaction', txn_id=txn.id) }}"
+                                    >
+                                        Review
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+                    No transactions yet. Upload a receipt to get started.
+                </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
     </div>
 
+</div>
 
-    <section class="cards">
-        <div class="card">
-            <p>Total recorded spending</p>
-            <div class="value">{{ total_spending }}</div>
-        </div>
-        <div class="card">
-            <p>Transactions</p>
-            <div class="value">{{ transaction_count }}</div>
-        </div>
-        <div class="card">
-            <p>Pending reviews</p>
-            <div class="value">{{ pending_count }}</div>
-        </div>
-    </section>
+<!-- CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    {% if pending_count %}
-    <div class="warning">
-        <strong>Action needed:</strong> You have {{ pending_count }} transaction(s) awaiting review.
-        AI-extracted details should be checked before confirmation.
-    </div>
-    {% endif %}
+<script>
 
-    <section class="panel" style="margin-top: 24px;">
-        <h2>Recent transactions</h2>
-        {% if transactions %}
-        <table>
-            <thead>
-                <tr><th>Merchant</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody>
-                {% for txn in transactions %}
-                <tr>
-                    <td>{{ txn.merchant or "Unknown merchant" }}</td>
-                    <td>{{ txn.txn_date or "Unknown date" }}</td>
-                    <td>{{ txn.currency }} {{ "%.2f"|format((txn.total_minor or 0) / 100) }}</td>
-                    <td><span class="status">{{ txn.status }}</span></td>
-                    <td><a href="{{ url_for('review_transaction', txn_id=txn.id) }}">Review</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="muted">No transactions yet. Upload a receipt to get started.</p>
-        {% endif %}
-    </section>
-</main>
+    // RUPEE FORMATTER
+
+    const rupees = value => {
+
+        return "₹" + Number(value || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+    };
+
+
+    // MONTHLY SPENDING DATA
+
+    const monthlyRaw = {{ monthly_trend | map(attribute='total_amount') | list | tojson }};
+
+    const monthlyLabels = {{ monthly_trend | map(attribute='month') | list | tojson }}.map(month => {
+
+        const [year, monthNumber] = month.split("-");
+
+        return new Date(
+            Number(year),
+            Number(monthNumber) - 1
+        ).toLocaleDateString("en-IN", {
+            month: "short",
+            year: "numeric"
+        });
+
+    });
+
+
+    // MONTHLY SPENDING BAR CHART
+
+    const monthlyCanvas = document.getElementById("monthlySpendingChart");
+
+    if (monthlyCanvas) {
+
+        new Chart(monthlyCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: monthlyLabels,
+
+                datasets: [{
+
+                    label: "Monthly Spending",
+
+                    data: monthlyRaw,
+
+                    backgroundColor: "#5965dc",
+
+                    borderRadius: 4,
+
+                    maxBarThickness: 28
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label: context => " " + rupees(context.parsed.y)
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            color: "#6b7280",
+                            font: { size: 10 }
+                        }
+
+                    },
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        grid: {
+                            color: "#edf0f4"
+                        },
+
+                        ticks: {
+
+                            color: "#6b7280",
+
+                            font: { size: 10 },
+
+                            callback: value => rupees(value)
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+    // CATEGORY DATA
+
+    const categoryLabels = {{ category_spending | map(attribute='category') | list | tojson }};
+
+    const categoryAmounts = {{ category_spending | map(attribute='total_amount') | list | tojson }};
+
+
+    // DOUGHNUT CHART WITH CENTER TOTAL
+
+    const categoryCanvas = document.getElementById("categorySpendingChart");
+
+    if (categoryCanvas && categoryLabels.length) {
+
+        const centerTextPlugin = {
+
+            id: "doughnutCenterText",
+
+            afterDraw(chart) {
+
+                const { ctx, chartArea } = chart;
+
+                if (!chartArea) return;
+
+                const total = chart.data.datasets[0].data.reduce(
+                    (sum, value) => sum + Number(value || 0),
+                    0
+                );
+
+                const x = (chartArea.left + chartArea.right) / 2;
+
+                const y = (chartArea.top + chartArea.bottom) / 2;
+
+                ctx.save();
+
+                ctx.textAlign = "center";
+
+                ctx.textBaseline = "middle";
+
+                ctx.fillStyle = "#172033";
+
+                ctx.font = "bold 17px Inter";
+
+                ctx.fillText(rupees(total), x, y - 8);
+
+                ctx.fillStyle = "#6b7280";
+
+                ctx.font = "10px Inter";
+
+                ctx.fillText("Total Spending", x, y + 13);
+
+                ctx.restore();
+
+            }
+
+        };
+
+        new Chart(categoryCanvas, {
+
+            type: "doughnut",
+
+            data: {
+
+                labels: categoryLabels,
+
+                datasets: [{
+
+                    data: categoryAmounts,
+
+                    backgroundColor: [
+                        "#5965dc",
+                        "#10a37f",
+                        "#f59e0b",
+                        "#8b5cf6",
+                        "#ef6472",
+                        "#0ea5a4",
+                        "#64748b"
+                    ],
+
+                    borderWidth: 2,
+
+                    borderColor: "#ffffff",
+
+                    hoverOffset: 5
+
+                }]
+
+            },
+
+            plugins: [centerTextPlugin],
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                cutout: "65%",
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom",
+
+                        labels: {
+
+                            usePointStyle: true,
+
+                            pointStyle: "circle",
+
+                            boxWidth: 7,
+
+                            padding: 14,
+
+                            font: { size: 10 }
+
+                        }
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label: context => {
+
+                                const total = context.dataset.data.reduce(
+                                    (sum, value) => sum + Number(value || 0),
+                                    0
+                                );
+
+                                const amount = Number(context.parsed || 0);
+
+                                const percentage = total
+                                    ? (amount / total * 100).toFixed(1)
+                                    : "0.0";
+
+                                return `${context.label}: ${rupees(amount)} (${percentage}%)`;
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+</script>
+
 </body>
 </html>

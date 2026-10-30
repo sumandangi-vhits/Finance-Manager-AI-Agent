@@ -1,50 +1,1100 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Transactions | Finance Manager</title>
-</head>
-<body>
-    <h1>Your transactions</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for category, message in messages %}
-            <div style="background-color: #fff3cd;
-                        color: #856404;
-                        border: 1px solid #ffe69c;
-                        padding: 12px;
-                        margin: 15px 0;
-                        border-radius: 5px;">
-                ⚠️ {{ message }}
-            </div>
-        {% endfor %}
-    {% endwith %}
-    <p>
-        <a href="{{ url_for('index') }}">Back to dashboard</a>
-        |
-        <a href="{{ url_for('export_transactions') }}">Export CSV</a>
-    </p>
 
-    {% if transactions %}
-    <table border="1" cellpadding="10">
-        <thead>
-            <tr><th>Merchant</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr>
-        </thead>
-        <tbody>
-            {% for txn in transactions %}
-            <tr>
-                <td>{{ txn.merchant or "Unknown merchant" }}</td>
-                <td>{{ txn.txn_date or "Unknown date" }}</td>
-                <td>{{ txn.currency }} {{ "%.2f"|format((txn.total_minor or 0) / 100) }}</td>
-                <td>{{ txn.status }}</td>
-                <td><a href="{{ url_for('review_transaction', txn_id=txn.id) }}">Review</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No transactions yet.</p>
-    {% endif %}
+    <title>Transactions | FinTrack AI</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+
+        :root {
+            --navy: #1e293b;
+            --green: #10a37f;
+            --purple: #5965dc;
+            --page: #f4f6fa;
+            --text: #172033;
+            --muted: #6b7280;
+            --border: #e2e6ed;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            background: var(--page);
+            color: var(--text);
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 10px;
+            color: #e8edf5;
+            background: var(--navy);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px 25px;
+            color: white;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand-icon {
+            color: var(--green);
+            font-size: 23px;
+        }
+
+        .nav-links {
+            display: grid;
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 42px;
+            padding: 0 12px;
+            border-radius: 8px;
+            color: #d5dce7;
+            text-decoration: none;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .nav-link i {
+            width: 18px;
+            font-size: 16px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,.12);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        /* MAIN CONTENT */
+
+        .main-area {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #64748b;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        /* TRANSACTION PANEL */
+
+        .transaction-panel {
+            background: white;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(20,31,50,.045);
+        }
+
+        /* TOOLBAR */
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 250px;
+            max-width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 40px;
+            padding: 0 38px 0 12px;
+            border: 1px solid #d5d9e1;
+            border-radius: 7px;
+            outline: none;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        .search-box input:focus,
+        .filter-select:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 2px rgba(89,101,220,.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 13px;
+            top: 12px;
+            color: #7b8493;
+        }
+
+        .filters {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            height: 40px;
+            min-width: 120px;
+            padding: 0 12px;
+            border: 1px solid #d5d9e1;
+            border-radius: 7px;
+            background: white;
+            color: #303846;
+            outline: none;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .filter-button {
+            height: 40px;
+            padding: 0 15px;
+            border: none;
+            border-radius: 7px;
+            background: var(--purple);
+            color: white;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .export-button {
+            height: 40px;
+            padding: 0 13px;
+            border-radius: 7px;
+            background: #eaf8f3;
+            color: #078b6c;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* FLASH MESSAGES */
+
+        .flash-message {
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            border-radius: 7px;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffe69c;
+            font-size: 12px;
+        }
+
+        /* TABLE */
+
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        thead {
+            background: #f7f8fa;
+        }
+
+        th {
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 10px;
+            font-size: 12px;
+            color: #374151;
+            border-bottom: 1px solid #e8ebf0;
+        }
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        .amount {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* STATUS */
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #e6f6ef;
+            color: #087b59;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status.pending,
+        .status.needs_review {
+            background: #fff4d8;
+            color: #946200;
+        }
+
+        .status.rejected,
+        .status.duplicate {
+            background: #feecec;
+            color: #c03939;
+        }
+
+        /* ACTION BUTTONS */
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .icon-btn {
+            border: none;
+            background: transparent;
+            padding: 3px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .edit-btn {
+            color: #5965a9;
+        }
+
+        .delete-btn {
+            color: #b34d5b;
+        }
+
+        .icon-btn:hover {
+            opacity: .65;
+            transform: scale(1.08);
+        }
+
+        .delete-form {
+            display: inline;
+        }
+
+        /* EMPTY STATE */
+
+        .empty-state {
+            padding: 35px 10px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .empty-state i {
+            display: block;
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #a0a8b5;
+        }
+
+        /* PAGINATION */
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 18px;
+        }
+
+        .page-btn {
+            min-width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 6px;
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .page-btn.active {
+            background: #eef0ff;
+            color: var(--purple);
+            font-weight: 700;
+        }
+
+        .page-btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            text-align: center;
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 9px;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width: 1050px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-area {
+                margin-left: 220px;
+            }
+        }
+
+        @media(max-width: 760px) {
+            .sidebar {
+                width: 68px;
+                padding: 16px 8px;
+            }
+
+            .brand {
+                justify-content: center;
+                padding: 0 0 25px;
+            }
+
+            .brand-name,
+            .nav-link span {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 0;
+            }
+
+            .main-area {
+                margin-left: 68px;
+            }
+
+            .topbar {
+                padding: 0 14px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .filters {
+                width: 100%;
+            }
+
+            .filter-select {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
+        @media(max-width: 480px) {
+            .profile {
+                font-size: 10px;
+            }
+
+            .filter-button {
+                flex: 1;
+            }
+
+            .export-button {
+                justify-content: center;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <span class="brand-icon">
+                <i class="bi bi-bar-chart-fill"></i>
+            </span>
+
+            <span class="brand-name">FinTrack AI</span>
+        </div>
+
+        <nav class="nav-links">
+
+            <a class="nav-link" href="{{ url_for('index') }}">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a class="nav-link active" href="{{ url_for('transactions_page') }}">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Transactions</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('upload_receipt') }}">
+                <i class="bi bi-cloud-upload"></i>
+                <span>Upload Receipt</span>
+            </a>
+
+            <a class="nav-link" href="{{ url_for('ask_finance') }}">
+                <i class="bi bi-chat-square-dots"></i>
+                <span>Assistant</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <form method="POST" action="{{ url_for('auth.logout') }}">
+
+                <button
+                    type="submit"
+                    class="nav-link"
+                    style="width:100%;border:0;background:transparent;text-align:left;cursor:pointer;font-family:inherit;"
+                >
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN AREA -->
+
+    <div class="main-area">
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <h1 class="page-title">Transactions</h1>
+
+            <div class="profile">
+
+                <span class="avatar">
+                    {{ (email or 'U')[0]|upper }}
+                </span>
+
+                {{ email }}
+                <i class="bi bi-chevron-down"></i>
+
+            </div>
+
+        </header>
+
+
+        <main class="content">
+
+            <section class="transaction-panel">
+
+                <!-- FLASH MESSAGES -->
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+
+                    {% for category, message in messages %}
+
+                        <div class="flash-message">
+                            <i class="bi bi-exclamation-circle"></i>
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endwith %}
+
+
+                <!-- TOOLBAR -->
+
+                <div class="toolbar">
+
+                    <div class="search-box">
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search merchant, date or category..."
+                        >
+
+                        <i class="bi bi-search"></i>
+
+                    </div>
+
+
+                    <div class="filters">
+
+                        <button
+                            class="filter-button"
+                            type="button"
+                            onclick="resetFilters()"
+                        >
+                            <i class="bi bi-funnel"></i>
+                            Reset Filters
+                        </button>
+
+
+                        <select id="categoryFilter" class="filter-select">
+
+                            <option value="all">All Categories</option>
+
+                            {% for txn in transactions %}
+
+                                {% if txn.category %}
+
+                                    <option value="{{ txn.category|lower }}">
+                                        {{ txn.category }}
+                                    </option>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <select id="monthFilter" class="filter-select">
+
+                            <option value="all">All Months</option>
+
+                            {% for txn in transactions %}
+
+                                {% if txn.txn_date %}
+
+                                    <option value="{{ txn.txn_date[:7] }}">
+                                        {{ txn.txn_date[:7] }}
+                                    </option>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <a
+                            href="{{ url_for('export_transactions') }}"
+                            class="export-button"
+                        >
+                            <i class="bi bi-download"></i>
+                            Export CSV
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TRANSACTIONS TABLE -->
+
+                {% if transactions %}
+
+                <div class="table-scroll">
+
+                    <table id="transactionsTable">
+
+                        <thead>
+
+                            <tr>
+                                <th>Date</th>
+                                <th>Merchant</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="transactionBody">
+
+                            {% for txn in transactions %}
+
+                            <tr
+                                class="transaction-row"
+                                data-search="{{ (txn.merchant or '')|lower }} {{ (txn.category or '')|lower }} {{ (txn.txn_date or '')|lower }} {{ (txn.status or '')|lower }}"
+                                data-category="{{ (txn.category or '')|lower }}"
+                                data-month="{{ (txn.txn_date or '')[:7] }}"
+                            >
+
+                                <td>
+                                    {{ txn.txn_date or "Unknown date" }}
+                                </td>
+
+                                <td>
+                                    {{ txn.merchant or "Unknown merchant" }}
+                                </td>
+
+                                <td>
+                                    {{ txn.category or "Uncategorized" }}
+                                </td>
+
+                                <td class="amount">
+                                    {{ txn.currency }}
+                                    {{ "%.2f"|format((txn.total_minor or 0) / 100) }}
+                                </td>
+
+                                <td>
+
+                                    <span class="status {{ (txn.status or '')|lower|replace(' ', '_') }}">
+                                        {{ txn.status or "Unknown" }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <!-- EDIT / REVIEW -->
+
+                                        <a
+                                            href="{{ url_for('review_transaction', txn_id=txn.id) }}"
+                                            class="icon-btn edit-btn"
+                                            title="Review / Edit Transaction"
+                                            aria-label="Review transaction"
+                                        >
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+
+                                        <!-- DELETE -->
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('delete_transaction', txn_id=txn.id) }}"
+                                            class="delete-form"
+                                            onsubmit="return confirm('Are you sure you want to delete this transaction?');"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="icon-btn delete-btn"
+                                                title="Delete Transaction"
+                                                aria-label="Delete transaction"
+                                            >
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+
+                    <i class="bi bi-receipt"></i>
+
+                    No transactions found.
+
+                    <p>Upload a receipt to get started.</p>
+
+                    <a href="{{ url_for('upload_receipt') }}" class="export-button">
+                        Upload Receipt
+                    </a>
+
+                </div>
+
+                {% endif %}
+
+
+                <!-- FILTER EMPTY STATE -->
+
+                <div id="noResults" class="empty-state" style="display:none;">
+
+                    <i class="bi bi-search"></i>
+
+                    No matching transactions found.
+
+                </div>
+
+
+                <!-- PAGINATION -->
+
+                {% if transactions %}
+
+                <div class="pagination" id="pagination"></div>
+
+                <div class="page-info" id="pageInfo"></div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+
+<script>
+
+    const searchInput = document.getElementById("searchInput");
+
+    const categoryFilter = document.getElementById("categoryFilter");
+
+    const monthFilter = document.getElementById("monthFilter");
+
+    const rows = Array.from(
+        document.querySelectorAll(".transaction-row")
+    );
+
+    const pagination = document.getElementById("pagination");
+
+    const pageInfo = document.getElementById("pageInfo");
+
+    const noResults = document.getElementById("noResults");
+
+    const pageSize = 10;
+
+    let currentPage = 1;
+
+    let filteredRows = [...rows];
+
+
+    // REMOVE DUPLICATE FILTER OPTIONS
+
+    function removeDuplicateOptions(select) {
+
+        const seen = new Set();
+
+        Array.from(select.options).forEach((option, index) => {
+
+            if (index === 0) return;
+
+            const value = option.value;
+
+            if (seen.has(value)) {
+
+                option.remove();
+
+            } else {
+
+                seen.add(value);
+
+            }
+
+        });
+
+    }
+
+    if (categoryFilter) {
+        removeDuplicateOptions(categoryFilter);
+    }
+
+    if (monthFilter) {
+        removeDuplicateOptions(monthFilter);
+    }
+
+
+    // FILTER TRANSACTIONS
+
+    function applyFilters() {
+
+        const searchValue = searchInput.value.toLowerCase().trim();
+
+        const selectedCategory = categoryFilter.value;
+
+        const selectedMonth = monthFilter.value;
+
+        filteredRows = rows.filter(row => {
+
+            const searchText = row.dataset.search;
+
+            const category = row.dataset.category;
+
+            const month = row.dataset.month;
+
+            const matchesSearch = searchText.includes(searchValue);
+
+            const matchesCategory =
+                selectedCategory === "all" ||
+                category === selectedCategory;
+
+            const matchesMonth =
+                selectedMonth === "all" ||
+                month === selectedMonth;
+
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesMonth
+            );
+
+        });
+
+        currentPage = 1;
+
+        renderTable();
+
+    }
+
+
+    // DISPLAY CURRENT PAGE
+
+    function renderTable() {
+
+        rows.forEach(row => {
+            row.style.display = "none";
+        });
+
+        const totalPages = Math.ceil(filteredRows.length / pageSize);
+
+        const start = (currentPage - 1) * pageSize;
+
+        const end = start + pageSize;
+
+        const currentRows = filteredRows.slice(start, end);
+
+        currentRows.forEach(row => {
+            row.style.display = "";
+        });
+
+
+        // EMPTY RESULT
+
+        if (noResults) {
+
+            noResults.style.display =
+                filteredRows.length === 0 ? "block" : "none";
+
+        }
+
+
+        // PAGINATION BUTTONS
+
+        if (pagination) {
+
+            pagination.innerHTML = "";
+
+            if (totalPages > 1) {
+
+                createPageButton(
+                    "«",
+                    currentPage > 1,
+                    () => changePage(currentPage - 1)
+                );
+
+                for (let i = 1; i <= totalPages; i++) {
+
+                    createPageButton(
+                        i,
+                        true,
+                        () => changePage(i),
+                        i === currentPage
+                    );
+
+                }
+
+                createPageButton(
+                    "»",
+                    currentPage < totalPages,
+                    () => changePage(currentPage + 1)
+                );
+
+            }
+
+        }
+
+
+        // PAGE INFORMATION
+
+        if (pageInfo) {
+
+            if (filteredRows.length > 0) {
+
+                pageInfo.textContent =
+                    `Showing ${start + 1}-${Math.min(end, filteredRows.length)} of ${filteredRows.length} transactions`;
+
+            } else {
+
+                pageInfo.textContent = "0 transactions found";
+
+            }
+
+        }
+
+    }
+
+
+    // CREATE PAGINATION BUTTON
+
+    function createPageButton(label, enabled, callback, active = false) {
+
+        const button = document.createElement("button");
+
+        button.type = "button";
+
+        button.className = "page-btn" + (active ? " active" : "");
+
+        button.textContent = label;
+
+        button.disabled = !enabled;
+
+        button.addEventListener("click", callback);
+
+        pagination.appendChild(button);
+
+    }
+
+
+    // CHANGE PAGE
+
+    function changePage(page) {
+
+        currentPage = page;
+
+        renderTable();
+
+    }
+
+
+    // RESET FILTERS
+
+    function resetFilters() {
+
+        searchInput.value = "";
+
+        categoryFilter.value = "all";
+
+        monthFilter.value = "all";
+
+        applyFilters();
+
+    }
+
+
+    // EVENT LISTENERS
+
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilters);
+    }
+
+    if (categoryFilter) {
+        categoryFilter.addEventListener("change", applyFilters);
+    }
+
+    if (monthFilter) {
+        monthFilter.addEventListener("change", applyFilters);
+    }
+
+
+    // INITIAL RENDER
+
+    renderTable();
+
+</script>
+
 </body>
 </html>

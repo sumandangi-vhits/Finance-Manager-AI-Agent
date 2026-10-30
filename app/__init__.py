@@ -1,8 +1,13 @@
 import tempfile
 from pathlib import Path
 import csv
+from datetime import date
 import io
-
+from app.agents.tools import (
+    get_category_spending,
+    get_spending_summary,
+    get_monthly_spending_trend,
+)
 from flask import Response
 from flask import flash, request
 from werkzeug.utils import secure_filename
@@ -16,7 +21,6 @@ from flask import (
     Flask, jsonify, redirect, render_template, session,
     url_for,
 )
-
 from .config import Config
 from .db import get_connection, init_db
 from .routes.auth import auth_bp
@@ -127,6 +131,32 @@ def create_app():
         try:
             user_id = session["user_id"]
             transactions = list_transactions(conn, user_id, limit=10)
+            category_spending = get_category_spending(
+                user_id,
+                app.config["DATABASE_PATH"],
+            )
+
+            today = date.today()
+            month_start = today.replace(day=1).isoformat()
+
+            monthly_summary = get_spending_summary(
+                user_id,
+                app.config["DATABASE_PATH"],
+                start_date=month_start,
+                end_date=today.isoformat(),
+            )
+
+            monthly_trend = get_monthly_spending_trend(
+                user_id,
+                app.config["DATABASE_PATH"],
+                months=6,
+            )
+
+            max_monthly_spending = max(
+                (item["total_amount"] for item in monthly_trend),
+                default=1,
+            )
+            max_monthly_spending = max(max_monthly_spending, 1)
 
             summary = conn.execute(
                 """
@@ -148,6 +178,10 @@ def create_app():
                 transaction_count=summary["transaction_count"],
                 total_spending=f"₹{summary['total_spending'] / 100:,.2f}",
                 pending_count=summary["pending_count"] or 0,
+                category_spending=category_spending,
+                monthly_summary=monthly_summary,
+                monthly_trend=monthly_trend,
+                max_monthly_spending=max_monthly_spending,
             )
         finally:
             conn.close()
@@ -235,6 +269,7 @@ def create_app():
             return render_template(
                 "transactions.html",
                 transactions=transactions,
+                email=session.get("user_email", "User"),
             )
         finally:
             conn.close()
@@ -268,8 +303,6 @@ def create_app():
                 if issue["field"] not in resolved_fields
             ]
 
-            print("REVIEW ISSUES:", issues)
-            print("UNCERTAIN FIELDS:", txn.get("uncertain_fields"))
             return render_template(
                 "review.html",
                 txn=txn,
@@ -278,6 +311,45 @@ def create_app():
             )
         finally:
             conn.close()
+
+    
+    @app.route("/transactions/<int:txn_id>/delete", methods=["POST"])
+    def delete_transaction(txn_id):
+        if "user_id" not in session:
+            return redirect(url_for("auth.login"))
+
+        conn = get_connection(app.config["DATABASE_PATH"])
+
+        try:
+        # Verify that this transaction belongs to the logged-in user
+            txn = conn.execute(
+                """
+                SELECT id FROM transactions
+                WHERE id = ? AND user_id = ?
+                """,
+                (txn_id, session["user_id"]),
+            ).fetchone()
+
+            if txn is None:
+                return "Transaction not found", 404
+
+        # Delete transaction; related records are removed by
+        # the database's ON DELETE CASCADE rules.
+            with conn:
+                conn.execute(
+                    """
+                    DELETE FROM transactions
+                    WHERE id = ? AND user_id = ?
+                    """,
+                    (txn_id, session["user_id"]),
+                )
+
+            flash("Transaction deleted successfully.", "success")
+            return redirect("/transactions")
+
+        finally:
+            conn.close()
+
 
 
     @app.route(
