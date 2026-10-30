@@ -506,3 +506,178 @@ def get_monthly_spending_trend(user_id, db_path, months=6):
 
     finally:
         conn.close()
+
+
+def get_gst_summary(user_id, db_path, start_date=None, end_date=None):
+    """Return recorded GST/tax amounts only when available."""
+
+    conn = get_connection(db_path)
+
+    try:
+        sql = """
+            SELECT
+                COUNT(*) AS transaction_count,
+                SUM(tax_minor) AS total_tax_minor
+            FROM transactions
+            WHERE user_id = ?
+              AND tax_minor IS NOT NULL
+              AND status IN ('confirmed', 'corrected')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM clarifications AS c
+                  WHERE c.user_id = transactions.user_id
+                    AND c.transaction_id = transactions.id
+                    AND c.field_name = 'duplicate'
+                    AND c.status = 'answered'
+                    AND c.answer = 'duplicate'
+              )
+        """
+
+        params = [user_id]
+
+        if start_date:
+            sql += " AND txn_date >= ?"
+            params.append(start_date)
+
+        if end_date:
+            sql += " AND txn_date <= ?"
+            params.append(end_date)
+
+        row = conn.execute(sql, params).fetchone()
+
+        if row["transaction_count"] == 0:
+            return {
+                "available": False,
+                "message": "No GST/tax amounts are recorded in the selected transactions."
+            }
+
+        return {
+            "available": True,
+            "transaction_count": row["transaction_count"],
+            "total_tax_minor": row["total_tax_minor"],
+            "total_tax_amount": row["total_tax_minor"] / 100,
+            "currency": "INR",
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+
+    finally:
+        conn.close()
+
+def get_transaction_adjustment_details(user_id, db_path, transaction_id):
+    """Retrieve recorded GST/tax and discount for one transaction."""
+
+    conn = get_connection(db_path)
+
+    try:
+        row = conn.execute(
+            """
+            SELECT
+                id,
+                merchant,
+                txn_date,
+                total_minor,
+                tax_minor,
+                discount_minor,
+                currency,
+                status
+            FROM transactions
+            WHERE id = ?
+              AND user_id = ?
+              AND status IN ('confirmed', 'corrected')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM clarifications AS c
+                  WHERE c.user_id = transactions.user_id
+                    AND c.transaction_id = transactions.id
+                    AND c.field_name = 'duplicate'
+                    AND c.status = 'answered'
+                    AND c.answer = 'duplicate'
+              )
+            """,
+            (transaction_id, user_id),
+        ).fetchone()
+
+        if row is None:
+            return {"available": False, "message": "Transaction not found."}
+
+        result = {
+            "available": True,
+            "transaction_id": row["id"],
+            "merchant": row["merchant"],
+            "date": row["txn_date"],
+            "total_amount": (
+                row["total_minor"] / 100
+                if row["total_minor"] is not None else None
+            ),
+            "currency": row["currency"],
+            "status": row["status"],
+        }
+
+        if row["tax_minor"] is not None:
+            result["gst_amount"] = row["tax_minor"] / 100
+
+        if row["discount_minor"] is not None:
+            result["discount_amount"] = row["discount_minor"] / 100
+
+        return result
+
+    finally:
+        conn.close()
+
+
+def get_discount_summary(user_id, db_path, start_date=None, end_date=None):
+    """Summarize recorded discounts for confirmed transactions."""
+
+    conn = get_connection(db_path)
+
+    try:
+        sql = """
+            SELECT
+                COUNT(*) AS transaction_count,
+                SUM(discount_minor) AS total_discount_minor
+            FROM transactions
+            WHERE user_id = ?
+              AND discount_minor IS NOT NULL
+              AND status IN ('confirmed', 'corrected')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM clarifications AS c
+                  WHERE c.user_id = transactions.user_id
+                    AND c.transaction_id = transactions.id
+                    AND c.field_name = 'duplicate'
+                    AND c.status = 'answered'
+                    AND c.answer = 'duplicate'
+              )
+        """
+
+        params = [user_id]
+
+        if start_date:
+            sql += " AND txn_date >= ?"
+            params.append(start_date)
+
+        if end_date:
+            sql += " AND txn_date <= ?"
+            params.append(end_date)
+
+        row = conn.execute(sql, params).fetchone()
+
+        if row["transaction_count"] == 0:
+            return {
+                "available": False,
+                "message": "No discount amounts are recorded."
+            }
+
+        return {
+            "available": True,
+            "transaction_count": row["transaction_count"],
+            "total_discount_minor": row["total_discount_minor"],
+            "total_discount_amount": row["total_discount_minor"] / 100,
+            "currency": "INR",
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+
+    finally:
+        conn.close()
