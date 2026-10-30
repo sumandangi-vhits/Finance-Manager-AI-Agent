@@ -2,9 +2,7 @@ import hashlib
 import mimetypes
 import shutil
 from pathlib import Path
-
 from app.config import Config
-
 
 def hash_file(path):
     """SHA-256 fingerprint of a file's contents."""

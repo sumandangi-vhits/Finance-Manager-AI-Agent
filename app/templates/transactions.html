@@ -556,11 +556,8 @@
     </aside>
 
 
-    <!-- MAIN AREA -->
-
     <div class="main-area">
 
-        <!-- HEADER -->
 
         <header class="topbar">
 
@@ -584,7 +581,6 @@
 
             <section class="transaction-panel">
 
-                <!-- FLASH MESSAGES -->
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
 
@@ -599,8 +595,6 @@
 
                 {% endwith %}
 
-
-                <!-- TOOLBAR -->
 
                 <div class="toolbar">
 
@@ -679,9 +673,6 @@
 
                 </div>
 
-
-                <!-- TRANSACTIONS TABLE -->
-
                 {% if transactions %}
 
                 <div class="table-scroll">
@@ -741,8 +732,6 @@
 
                                     <div class="actions">
 
-                                        <!-- EDIT / REVIEW -->
-
                                         <a
                                             href="{{ url_for('review_transaction', txn_id=txn.id) }}"
                                             class="icon-btn edit-btn"
@@ -752,8 +741,6 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
 
-
-                                        <!-- DELETE -->
 
                                         <form
                                             method="POST"
@@ -806,8 +793,6 @@
                 {% endif %}
 
 
-                <!-- FILTER EMPTY STATE -->
-
                 <div id="noResults" class="empty-state" style="display:none;">
 
                     <i class="bi bi-search"></i>
@@ -816,8 +801,6 @@
 
                 </div>
 
-
-                <!-- PAGINATION -->
 
                 {% if transactions %}
 
@@ -835,8 +818,6 @@
 
 </div>
 
-
-<!-- JAVASCRIPT -->
 
 <script>
 
@@ -862,8 +843,6 @@
 
     let filteredRows = [...rows];
 
-
-    // REMOVE DUPLICATE FILTER OPTIONS
 
     function removeDuplicateOptions(select) {
 
@@ -897,8 +876,6 @@
         removeDuplicateOptions(monthFilter);
     }
 
-
-    // FILTER TRANSACTIONS
 
     function applyFilters() {
 
@@ -941,8 +918,6 @@
     }
 
 
-    // DISPLAY CURRENT PAGE
-
     function renderTable() {
 
         rows.forEach(row => {
@@ -962,8 +937,6 @@
         });
 
 
-        // EMPTY RESULT
-
         if (noResults) {
 
             noResults.style.display =
@@ -971,8 +944,6 @@
 
         }
 
-
-        // PAGINATION BUTTONS
 
         if (pagination) {
 
@@ -1008,8 +979,6 @@
         }
 
 
-        // PAGE INFORMATION
-
         if (pageInfo) {
 
             if (filteredRows.length > 0) {
@@ -1027,8 +996,6 @@
 
     }
 
-
-    // CREATE PAGINATION BUTTON
 
     function createPageButton(label, enabled, callback, active = false) {
 
@@ -1048,9 +1015,6 @@
 
     }
 
-
-    // CHANGE PAGE
-
     function changePage(page) {
 
         currentPage = page;
@@ -1060,7 +1024,6 @@
     }
 
 
-    // RESET FILTERS
 
     function resetFilters() {
 
@@ -1075,8 +1038,6 @@
     }
 
 
-    // EVENT LISTENERS
-
     if (searchInput) {
         searchInput.addEventListener("input", applyFilters);
     }
@@ -1089,8 +1050,6 @@
         monthFilter.addEventListener("change", applyFilters);
     }
 
-
-    // INITIAL RENDER
 
     renderTable();
 

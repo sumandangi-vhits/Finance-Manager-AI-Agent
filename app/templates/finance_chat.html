@@ -34,8 +34,6 @@
             background: var(--page);
         }
 
-        /* SIDEBAR - SAME AS DASHBOARD */
-
         .sidebar {
             width: 250px;
             position: fixed;
@@ -114,8 +112,6 @@
             font-family: inherit;
         }
 
-        /* MAIN AREA - SAME AS DASHBOARD */
-
         .main-area {
             margin-left: 250px;
             min-height: 100vh;
@@ -160,8 +156,6 @@
             font-size: 11px;
             font-weight: 600;
         }
-
-        /* CHAT CONTENT */
 
         .content {
             flex: 1;
@@ -233,8 +227,6 @@
             margin: 0;
         }
 
-        /* CHAT MESSAGES */
-
         .chat-message {
             display: flex;
             gap: 10px;
@@ -298,8 +290,6 @@
             border-top-left-radius: 3px;
             box-shadow: 0 1px 3px rgba(0,0,0,.03);
         }
-
-        /* AI RESPONSE FORMATTING */
 
         .answer {
             min-width: 0;
@@ -389,8 +379,6 @@
             height: auto;
         }
 
-        /* QUICK PROMPTS */
-
         .quick-prompts {
             padding: 12px 14px 9px;
             background: white;
@@ -435,8 +423,6 @@
             font-size: 13px;
         }
 
-        /* FLASH MESSAGES */
-
         .flash-message {
             padding: 10px 13px;
             border-radius: 6px;
@@ -463,8 +449,6 @@
             background: #eaf2ff;
             color: #285da8;
         }
-
-        /* MESSAGE INPUT */
 
         .input-area {
             padding: 11px 14px 13px;
@@ -606,7 +590,6 @@
 
 <div class="app-shell">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
 
         <div class="brand">
@@ -651,10 +634,9 @@
 
     </aside>
 
-    <!-- MAIN CONTENT -->
     <div class="main-area">
 
-        <!-- HEADER -->
+    
         <header class="topbar">
 
             <h1 class="page-title">AI Finance Assistant</h1>
@@ -677,7 +659,6 @@
 
             <section class="chat-card">
 
-                <!-- CONVERSATION AREA -->
                 <div class="chat-area" id="chatArea">
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -736,7 +717,6 @@
 
                 </div>
 
-                <!-- QUICK PROMPTS -->
                 <div class="quick-prompts">
 
                     <div class="quick-title">Quick Prompts</div>
@@ -783,7 +763,6 @@
 
                 </div>
 
-                <!-- MESSAGE INPUT -->
                 <div class="input-area">
 
                     <form method="POST" id="financeForm" class="chat-form">
@@ -817,10 +796,8 @@
 
 </div>
 
-<!-- MARKDOWN LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-<!-- HTML SANITIZER -->
 <script src="https://unpkg.com/dompurify@3.2.6/dist/purify.min.js"></script>
 
 <script>
@@ -828,7 +805,6 @@
     const financeForm = document.getElementById("financeForm");
     const sendBtn = document.getElementById("sendBtn");
 
-    // Quick prompt buttons
     document.querySelectorAll(".prompt-btn").forEach(button => {
 
         button.addEventListener("click", function() {
@@ -838,7 +814,6 @@
 
     });
 
-    // Submit form
     financeForm.addEventListener("submit", function(event) {
 
         if (!questionInput.value.trim()) {
@@ -852,7 +827,6 @@
 
     });
 
-    // Clean and format Gemini Markdown response
     const answerElement = document.getElementById("aiAnswer");
 
     if (
@@ -863,7 +837,6 @@
 
         let rawAnswer = answerElement.textContent || "";
 
-        // Normalize line endings and whitespace
         rawAnswer = rawAnswer
             .replace(/\r\n/g, "\n")
             .replace(/\u00a0/g, " ")
@@ -871,36 +844,30 @@
             .replace(/\u202f/g, " ")
             .trim();
 
-        // Remove accidental indentation from every line
         rawAnswer = rawAnswer
             .split("\n")
             .map(line => line.replace(/^[ \t]+/, ""))
             .join("\n");
-
-        // Remove accidental wrapping code fences
+        
         rawAnswer = rawAnswer
             .replace(/^```(?:markdown|md|text)?[ \t]*\n/i, "")
             .replace(/\n```[ \t]*$/i, "");
-
-        // Convert Markdown to HTML
+       
         const formattedHTML = marked.parse(rawAnswer, {
             breaks: true,
             gfm: true
         });
-
-        // Sanitize HTML before displaying
+      
         answerElement.innerHTML =
             DOMPurify.sanitize(formattedHTML);
 
     }
 
-    // Scroll to latest conversation content
     const chatArea = document.getElementById("chatArea");
 
     if (chatArea) {
         chatArea.scrollTop = chatArea.scrollHeight;
     }
 </script>
-
 </body>
 </html>

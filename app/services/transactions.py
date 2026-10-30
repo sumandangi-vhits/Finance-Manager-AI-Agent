@@ -1,10 +1,8 @@
 import json
 from datetime import date
-
 from app.models.schemas import LineItemIn, TransactionIn
 from app.services.validator import validate_transaction
 
-# Only these columns may be edited. Anything else (user_id, status, ...) is refused.
 EDITABLE_FIELDS = {
     "merchant",
     "txn_date",
@@ -200,8 +198,6 @@ def get_corrections(conn, user_id, txn_id):
 
     return [dict(row) for row in rows]
 
-
-# ---------- clarification management ----------
 
 def create_clarification(conn, user_id, txn_id, field_name, question):
     """Create a pending clarification unless one already exists."""

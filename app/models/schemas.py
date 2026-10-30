@@ -1,10 +1,6 @@
 from datetime import date
 from typing import Optional
-
 from pydantic import BaseModel, Field, field_validator
-
-
-
 class ClarificationIn(BaseModel):
     field: str = Field(min_length=1)
     question: str = Field(min_length=1)
@@ -27,7 +23,6 @@ class LineItemIn(BaseModel):
     unit_price_minor: Optional[int] = Field(default=None, ge=0)
     total_minor: Optional[int] = Field(default=None, ge=0)
     category: Optional[str] = None
-
 
 class TransactionIn(BaseModel):
     merchant: Optional[str] = None
